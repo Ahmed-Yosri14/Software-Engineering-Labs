@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebSocket Foundations</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 720px;
+        margin: 40px auto;
+        padding: 0 16px;
+        line-height: 1.5;
+      }
+
+      form {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      input {
+        flex: 1;
+        padding: 8px;
+      }
+
+      button {
+        padding: 8px 12px;
+      }
+
+      #messages {
+        border: 1px solid #ccc;
+        min-height: 180px;
+        padding: 12px;
+      }
+
+      .message {
+        margin: 0 0 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WebSocket Foundations</h1>
+    <p>This page opens one WebSocket connection to the FastAPI server.</p>
+
+    <form id="message-form">
+      <input id="message-input" autocomplete="off" placeholder="Type a message" />
+      <button type="submit">Send</button>
+    </form>
+
+    <section id="messages"></section>
+
+    <script>
+      const messages = document.querySelector("#messages");
+      const form = document.querySelector("#message-form");
+      const input = document.querySelector("#message-input");
+
+      const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+      const socket = new WebSocket(`${protocol}://${window.location.host}/ws`);
+
+      function addMessage(text) {
+        const item = document.createElement("p");
+        item.className = "message";
+        item.textContent = text;
+        messages.appendChild(item);
+      }
+
+      socket.addEventListener("open", () => {
+        addMessage("Client: connected");
+      });
+
+      socket.addEventListener("message", (event) => {
+        addMessage(`Server: ${event.data}`);
+      });
+
+      socket.addEventListener("close", () => {
+        addMessage("Client: disconnected");
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const text = input.value.trim();
+        if (!text) {
+          return;
+        }
+
+        addMessage(`Client: ${text}`);
+        socket.send(text);
+        input.value = "";
+      });
+    </script>
+  </body>
+</html>
