@@ -34,7 +34,7 @@ class ConnectionManager:
                         "message": message,
                     }
                 )
-            except RuntimeError:
+            except (RuntimeError, WebSocketDisconnect):
                 disconnected_clients.append(connection)
 
         for connection in disconnected_clients:
