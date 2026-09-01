@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebSocket Chat Notifications</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 760px;
+        margin: 40px auto;
+        padding: 0 16px;
+        line-height: 1.5;
+      }
+
+      label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      input {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 8px;
+      }
+
+      button {
+        padding: 8px 12px;
+      }
+
+      .panel {
+        border: 1px solid #ccc;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .row input {
+        flex: 1;
+      }
+
+      #messages {
+        border: 1px solid #ccc;
+        min-height: 220px;
+        padding: 12px;
+        margin-bottom: 16px;
+      }
+
+      .message {
+        margin: 0 0 8px;
+      }
+
+      .notification {
+        color: #666;
+        font-style: italic;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WebSocket Chat Notifications</h1>
+
+    <section id="join-panel" class="panel">
+      <form id="join-form">
+        <label for="username-input">Display name</label>
+        <div class="row">
+          <input id="username-input" autocomplete="off" placeholder="Example: yosry" />
+          <button type="submit">Join</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="chat-panel" class="hidden">
+      <div id="messages"></div>
+
+      <form id="message-form" class="row">
+        <input id="message-input" aria-label="Chat message" autocomplete="off" placeholder="Type a message" />
+        <button type="submit">Send</button>
+      </form>
+    </section>
+
+    <script>
+      const joinPanel = document.querySelector("#join-panel");
+      const chatPanel = document.querySelector("#chat-panel");
+      const joinForm = document.querySelector("#join-form");
+      const messageForm = document.querySelector("#message-form");
+      const usernameInput = document.querySelector("#username-input");
+      const messageInput = document.querySelector("#message-input");
+      const messages = document.querySelector("#messages");
+
+      let socket = null;
+
+      function addMessage(text, className = "message") {
+        const item = document.createElement("p");
+        item.className = className;
+        item.textContent = text;
+        messages.appendChild(item);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function connect(username) {
+        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+        socket = new WebSocket(
+          `${protocol}://${window.location.host}/ws/${encodeURIComponent(username)}`
+        );
+
+        socket.addEventListener("open", () => {
+          joinPanel.classList.add("hidden");
+          chatPanel.classList.remove("hidden");
+          messageInput.focus();
+        });
+
+        socket.addEventListener("message", (event) => {
+          const data = JSON.parse(event.data);
+          const className = data.type === "notification" ? "message notification" : "message";
+          addMessage(data.message, className);
+        });
+
+        socket.addEventListener("close", () => {
+          addMessage("Disconnected from chat", "message notification");
+          messageInput.disabled = true;
+          socket = null;
+        });
+      }
+
+      joinForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const username = usernameInput.value.trim();
+        if (!username) {
+          return;
+        }
+
+        connect(username);
+      });
+
+      messageForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const message = messageInput.value.trim();
+        if (!message || socket === null) {
+          return;
+        }
+
+        socket.send(message);
+        messageInput.value = "";
+      });
+    </script>
+  </body>
+</html>
+
