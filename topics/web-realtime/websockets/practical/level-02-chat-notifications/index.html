@@ -127,6 +127,7 @@
         socket.addEventListener("close", () => {
           addMessage("Disconnected from chat", "message notification");
           messageInput.disabled = true;
+          socket = null;
         });
       }
 
