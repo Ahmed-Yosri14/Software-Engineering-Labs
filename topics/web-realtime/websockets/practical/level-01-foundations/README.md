@@ -10,7 +10,6 @@ The goal is to learn the connection lifecycle:
 4. The browser sends text messages.
 5. The server receives each message and sends a response back over the same connection.
 
-At this level, there is no broadcast, no rooms, no authentication, no database, and no reconnect logic. Those belong in later levels.
 
 ## Run
 
@@ -27,7 +26,6 @@ Then open:
 http://127.0.0.1:8010
 ```
 
-This lab pins FastAPI to the Pydantic 1 generation because the current repo virtualenv uses Python 3.14 on Mingw, where the newer `pydantic-core` dependency does not install cleanly.
 
 ## What To Notice
 

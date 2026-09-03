@@ -4,19 +4,6 @@ This level builds a small WebSocket chat app in parts.
 
 The goal is to move from "one client talks to the server" to "many clients share one live chat room".
 
-## Parts
-
-| Part | Status | Focus |
-| --- | --- | --- |
-| 1 | Done | Broadcast messages to all connected clients and show join/leave notifications |
-| 2 | Done | Reject duplicate display names |
-| 3 | Done | Create rooms, list existing rooms, and join a selected room |
-| 4 | Done | Confirm before switching from one active room to another |
-| 5 | Done | Hide the join form while connected and join other rooms from the sidebar |
-| 6 | Done | Use modal confirmations for creating, switching, and leaving rooms |
-| 7 | Next | Add message validation and clearer error handling |
-| 8 | Later | Add browser notification permission for messages received while the tab is unfocused |
-
 ## Current Scope
 
 The current app intentionally keeps the persistence model simple:
@@ -76,9 +63,3 @@ Leaving a room also uses a confirmation modal because it closes the active WebSo
 - Only clients in the same room receive the same room events.
 - The server stores normalized usernames per room, so `Yosry` and `yosry` count as the same active name inside that room.
 - Duplicate username checks must happen on the server because browser checks can be bypassed.
-
-## Important Limitation
-
-This implementation stores connections in memory. That is fine for learning and for a single server process.
-
-In production, this does not automatically work across multiple server instances. If you run several FastAPI processes, each process only knows about its own WebSocket connections. Later levels should introduce Redis Pub/Sub, NATS, Kafka, or another shared messaging layer.
